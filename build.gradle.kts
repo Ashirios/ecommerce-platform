@@ -1,89 +1,89 @@
 import org.springframework.boot.gradle.tasks.bundling.BootJar
+import org.gradle.jvm.tasks.Jar
+import org.gradle.api.JavaVersion
+import org.gradle.api.plugins.JavaPluginExtension
+import io.spring.gradle.dependencymanagement.dsl.DependencyManagementExtension
 
-val springBootVersion = "4.0.3"
-val springCloudversion = "2025.0.1"
+val springBootVersion = "3.4.3"  // Исправлено на существующую версию
+val springCloudVersion = "2024.0.0"  // Исправлено на существующую версию
 
-plugins{
-    id("org.springframework.boot") version "4.0.3" apply false
-    id("io.spring.dependency-management") version "1.1.6" apply false
+plugins {
+    id("org.springframework.boot") version "3.4.3" apply false  // Исправлено
+    id("io.spring.dependency-management") version "1.1.7" apply false
     kotlin("jvm") version "1.9.21" apply false
 }
 
-allprojects{
+allprojects {
     group = "com.ecommerce"
     version = "1.0.0"
 
-    repositories{
+    repositories {
         mavenCentral()
-        maven {
-            url = uri("https://repo.spring.io/milestone")
-        }
+        maven { url = uri("https://repo.spring.io/milestone") }
     }
 }
 
-subprojects{
+subprojects {
     apply(plugin = "java")
     apply(plugin = "org.springframework.boot")
     apply(plugin = "io.spring.dependency-management")
 
-    java {
-        sourceCompatibilty = JavaVersion.VERSION_21
-        targetCompatibility = JavaVersion.VERSION_21 
+    // Настройка Java версии - ТОЛЬКО ОДИН СПОСОБ
+    extensions.configure<JavaPluginExtension> {
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
     }
 
-    dependencies{
-        //Lombok
-        compileOnly("org.projectlombok:lombok")
-        annotationProcessor("org.projectlombok:lombok")
-        testCompileOnly("org.projectlombok:lombok")
-        testAnnotationProcessor("org.projectlombok:lombok")
-
-        //Logs
-        implementation("org.springframework.boot:sprint-boot-starter-logging")
-        implementation("nets.logstash.logback:logstash-logback-encoder:7.4")
-
-        //Testing
-        testImplementation("org.springframework.boot:spring-boot-starter-test")
-        testImplementation("org.mockito:mockito-inline:5.2.0")
-        testImplementation("org.testcontainers:testcontainers:1.19.4")
-
-    }
-
-    dependencyManagement{
-        imports{
-            mavenBom("org.springframework.cloud:sping-cloud-dependencies:$spingCloudVersion")
-
+    // Spring Dependency Management
+    extensions.configure<DependencyManagementExtension> {
+        imports {
+            mavenBom("org.springframework.cloud:spring-cloud-dependencies:$springCloudVersion")
         }
     }
 
-    tasks.withType<BootJar>("bootJar"){
+    // Зависимости
+    dependencies {
+        // Lombok
+        "compileOnly"("org.projectlombok:lombok")
+        "annotationProcessor"("org.projectlombok:lombok")
+        "testCompileOnly"("org.projectlombok:lombok")
+        "testAnnotationProcessor"("org.projectlombok:lombok")
+
+        // Logging
+        "implementation"("org.springframework.boot:spring-boot-starter-logging")
+        "implementation"("net.logstash.logback:logstash-logback-encoder:7.4")
+
+        // Testing
+        "testImplementation"("org.springframework.boot:spring-boot-starter-test")
+        "testImplementation"("org.mockito:mockito-inline:5.2.0")
+        "testImplementation"("org.testcontainers:testcontainers:1.19.4")
+    }
+
+    // Настройка BootJar и Jar
+    tasks.withType<BootJar> {
         enabled = false
     }
-
-    tasks.withType<Jar>("jar"){
+    tasks.withType<Jar> {
         enabled = true
     }
 }
 
-//configurations
-configer(subprojects.filter{ it.name != "shared"}){
-    tasks.withType<BootJar>("bootJar"){
+subprojects.filter { it.name != "shared" }.forEach {
+    it.tasks.withType<BootJar> {
         enabled = true
     }
-
-    tasks.withType<Jar>("jar"){
-       enabled = false
+    it.tasks.withType<Jar> {
+        enabled = false
     }
 }
 
-//services
-tasks.register("buildAllServices"){
+tasks.register("buildAllServices") {
     dependsOn(
         ":api-gateway:build",
         ":services:user-service:build"
     )
 }
 
-tasks.register("test"){
-    dependsOn(subprojects.map{ ${it.path}:test })
+tasks.register("test") {
+    dependsOn(subprojects.map { it.tasks.named("test") })
 }
