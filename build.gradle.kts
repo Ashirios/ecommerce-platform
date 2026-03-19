@@ -4,11 +4,12 @@ import org.gradle.api.JavaVersion
 import org.gradle.api.plugins.JavaPluginExtension
 import io.spring.gradle.dependencymanagement.dsl.DependencyManagementExtension
 
-val springBootVersion = "3.4.3"  // Исправлено на существующую версию
-val springCloudVersion = "2024.0.0"  // Исправлено на существующую версию
+val springBootVersion = "4.0.3"  
+val springCloudVersion = "2025.1.0"  
 
 plugins {
-    id("org.springframework.boot") version "3.4.3" apply false  // Исправлено
+    base
+    id("org.springframework.boot") version "4.0.3" apply false  
     id("io.spring.dependency-management") version "1.1.7" apply false
     kotlin("jvm") version "1.9.21" apply false
 }
@@ -28,20 +29,17 @@ subprojects {
     apply(plugin = "org.springframework.boot")
     apply(plugin = "io.spring.dependency-management")
 
-    // Настройка Java версии - ТОЛЬКО ОДИН СПОСОБ
     extensions.configure<JavaPluginExtension> {
         sourceCompatibility = JavaVersion.VERSION_21
         targetCompatibility = JavaVersion.VERSION_21
     }
 
-    // Spring Dependency Management
     extensions.configure<DependencyManagementExtension> {
         imports {
             mavenBom("org.springframework.cloud:spring-cloud-dependencies:$springCloudVersion")
         }
     }
 
-    // Зависимости
     dependencies {
         // Lombok
         "compileOnly"("org.projectlombok:lombok")
@@ -59,20 +57,20 @@ subprojects {
         "testImplementation"("org.testcontainers:testcontainers:1.19.4")
     }
 
-    // Настройка BootJar и Jar
     tasks.withType<BootJar> {
         enabled = false
     }
+    
     tasks.withType<Jar> {
         enabled = true
     }
 }
 
-subprojects.filter { it.name != "shared" }.forEach {
-    it.tasks.withType<BootJar> {
+listOf("api-gateway", "user-service").forEach { moduleName ->
+    project(":$moduleName").tasks.withType<BootJar> {
         enabled = true
     }
-    it.tasks.withType<Jar> {
+    project(":$moduleName").tasks.withType<Jar> {
         enabled = false
     }
 }
@@ -80,7 +78,7 @@ subprojects.filter { it.name != "shared" }.forEach {
 tasks.register("buildAllServices") {
     dependsOn(
         ":api-gateway:build",
-        ":services:user-service:build"
+        ":user-service:build"
     )
 }
 

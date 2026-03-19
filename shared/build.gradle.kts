@@ -1,4 +1,5 @@
 plugins{
+    id("java-library")
     id("org.springframework.boot")
     id("io.spring.dependency-management")
     java
@@ -13,15 +14,13 @@ tasks.getByName<Jar>("jar"){
 
 dependencies{
     //Spring
-    api("org.spingframework.boot:spring-boot-starter-web")
-    api("org.spingframework.boot:spring-boot-starter-data-jpa")
+    api("org.springframework.boot:spring-boot-starter-web")
+    api("org.springframework.boot:spring-boot-starter-data-jpa")
 
     //Validatiom
-    api("org.spingframework.boot:spring-boot-starter-validation")
+    api("org.springframework.boot:spring-boot-starter-validation")
 
-    //Jackson
-    api("org.fasterxml.jackson.core:jackson-databind")
-
+    
     //Lombok
     compileOnly("org.projectlombok:lombok")
     annotationProcessor("org.projectlombok:lombok")

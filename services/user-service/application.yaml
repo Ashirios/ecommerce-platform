@@ -1,0 +1,14 @@
+spring:
+  application:
+    name: user-service
+  cloud:
+    discovery:
+      enabled: false  
+
+server:
+  port: 8081
+
+
+eureka:
+  client:
+    enabled: false
