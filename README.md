@@ -5,7 +5,7 @@
 
 ---
 
-## 🇷🇺 Русский
+
 
 ### О проекте
 
@@ -68,7 +68,7 @@ cd ecommerce-platform
 
 ---
 
-## 🇬🇧 English
+
 
 ### About
 
