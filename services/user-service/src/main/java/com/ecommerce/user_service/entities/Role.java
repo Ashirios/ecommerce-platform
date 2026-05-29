@@ -9,6 +9,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
@@ -21,7 +22,10 @@ import lombok.Setter;
 import lombok.ToString;
 
 @Entity
-@Table(name="roles")
+@Table(name="roles", indexes={
+    @Index(name="idx_role_name", columnList="name", unique=true),
+    @Index(name="idx_role_permission", columnList="permission")
+})
 @Getter
 @Setter
 @NoArgsConstructor
@@ -39,7 +43,7 @@ public class Role {
     @Column(length=255)
     private String description;
 
-    @ManyToMany(fetch=FetchType.EAGER)
+    @ManyToMany(fetch=FetchType.LAZY)
     @JoinTable(
         name="role_permissions",
         joinColumns=@JoinColumn(name="role_id"),
